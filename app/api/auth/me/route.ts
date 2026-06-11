@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession, Session } from "next-auth";
-import { prisma } from "../../../../lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "../../../../lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,7 +31,6 @@ export async function GET(req: NextRequest) {
         _count: {
           select: {
             reports: true,
-            verifications: true,
           },
         },
       },
@@ -67,7 +66,7 @@ export async function GET(req: NextRequest) {
       user,
       stats: {
         totalReports: user._count.reports,
-        totalVerifications: user._count.verifications,
+        totalVerifications: user._count.reports,
         unreadNotifications: notifications.length,
       },
       recentReports,
