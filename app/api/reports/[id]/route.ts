@@ -23,7 +23,7 @@ export async function GET(
             role: true,
           },
         },
-        verification: true,
+        // verification: true,  // ❌ REMOVED - field doesn't exist
         updates: {
           orderBy: { createdAt: "desc" },
         },
@@ -152,10 +152,10 @@ export async function POST(
           title: "New comment on your report",
           message: `${commenterName} commented on "${reportOwner.title}"`,
           type: "REPORT_UPDATE",
-          metadata: { 
-            reportId: id, 
-            commentId: comment.id 
-          },
+          // metadata: {   // ❌ REMOVED - field doesn't exist
+          //   reportId: id, 
+          //   commentId: comment.id 
+          // },
         },
       });
     }

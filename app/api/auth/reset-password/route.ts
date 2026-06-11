@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { EmailService } from "../../../../lib/email";
+import { EmailService } from "@/lib/email";
 import crypto from "crypto";
 
 const requestResetSchema = z.object({
@@ -17,7 +17,6 @@ const resetPasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain a number"),
 });
 
-// Request password reset
 export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
@@ -49,7 +48,6 @@ async function requestReset(req: NextRequest) {
       where: { email },
     });
     
-    // Don't reveal if user exists for security
     if (!user) {
       return NextResponse.json({
         success: true,
@@ -57,21 +55,18 @@ async function requestReset(req: NextRequest) {
       });
     }
     
-    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000);
     
-    // ✅ Store reset token on user record
-    await prisma.user.update({
-      where: { id: user.id },
+    // ✅ Use lowercase: passwordReset
+    await prisma.passwordReset.create({
       data: {
-        // prisma schema uses camelCase field names
-        resetToken: resetToken,
-        resetTokenExpires: resetExpires,
+        userId: user.id,
+        token: resetToken,
+        expiresAt: resetExpires,
       },
     });
     
-    // Send reset email
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;
     
     await EmailService.sendEmailResend({
@@ -127,36 +122,34 @@ async function resetPassword(req: NextRequest) {
     
     const { token, password } = validated.data;
     
-    // ✅ Find valid reset token on user record
-    // prisma generated types may not expose custom fields in the WhereInput
-    // cast the where clause to any to avoid TypeScript errors while keeping
-    // the runtime query intact
-    const user = await prisma.user.findFirst({
-      where: ({
-        // use camelCase names matching the prisma schema
-        resetToken: token,
-        resetTokenExpires: { gt: new Date() },
-      } as any),
+    // ✅ Use lowercase: passwordReset
+    const passwordReset = await prisma.passwordReset.findFirst({
+      where: {
+        token: token,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
     });
     
-    if (!user) {
+    if (!passwordReset) {
       return NextResponse.json(
         { error: "Invalid or expired reset token" },
         { status: 400 }
       );
     }
     
-    // Hash new password
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    // Update user password and clear reset token
     await prisma.user.update({
-      where: { id: user.id },
+      where: { id: passwordReset.userId },
       data: {
         password: hashedPassword,
-        resetToken: null,
-        resetTokenExpires: null,
       },
+    });
+    
+    // ✅ Use lowercase: passwordReset
+    await prisma.passwordReset.delete({
+      where: { id: passwordReset.id },
     });
     
     return NextResponse.json({

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, message, type, metadata } = body;
+    const { title, message, type } = body;  // ❌ Remove metadata from here
 
     if (!title || !message) {
       return NextResponse.json(
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         title,
         message,
         type: type || "GENERAL",
-        metadata: metadata || {}
+        // ❌ metadata: metadata || {}  - REMOVE THIS LINE
       }
     });
 
