@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install --no-audit --no-fund",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
+  "buildCommand": "next build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs"
 }
