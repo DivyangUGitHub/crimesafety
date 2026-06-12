@@ -10,13 +10,6 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'CrimeSafety - Report & Track Crimes',
   description: 'AI-powered crime reporting and tracking platform',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: true,
-    viewportFit: 'cover',
-  },
 };
 
 export default function RootLayout({
@@ -26,10 +19,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-        <meta name="theme-color" content="#000000" />
-      </head>
       <body className={inter.className}>
         <AuthProvider>
           {children}
