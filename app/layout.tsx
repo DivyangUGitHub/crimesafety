@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import AuthProvider from '@/app/components/AuthProvider';
-import DisableInspect from './components/DisableInspect';
+// import DisableInspect from './components/DisableInspect';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           {children}
-          <DisableInspect />
+          {/* <DisableInspect /> */}
           <Toaster position="top-right" />
         </AuthProvider>
       </body>

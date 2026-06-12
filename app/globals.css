@@ -424,17 +424,17 @@ html {
   color: white;
 }
 /* Disable text selection */
-body {
+/* body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
+} */
 
 /* Disable image dragging */
-img {
+/* img {
   -webkit-user-drag: none;
   user-drag: none;
-}
+} */
