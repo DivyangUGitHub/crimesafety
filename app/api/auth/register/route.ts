@@ -111,37 +111,57 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
+  console.log("1. API called");
+  
   try {
     const body = await req.json();
+    console.log("2. Body:", body);
+    
     const { name, email, password, phone, location, agreeTerms } = body;
 
-    // Simple validations
+    // Validation
     if (!name || name.length < 2) {
+      console.log("3. Name validation failed");
       return NextResponse.json({ error: "Name must be at least 2 characters" }, { status: 400 });
     }
+    
     if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: "Valid email required" }, { status: 400 });
+      console.log("3. Email validation failed");
+      return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
+    
     if (!password || password.length < 6) {
+      console.log("3. Password validation failed");
       return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
+    
     if (!agreeTerms) {
-      return NextResponse.json({ error: "You must agree to terms" }, { status: 400 });
+      console.log("3. Terms validation failed");
+      return NextResponse.json({ error: "You must agree to the terms" }, { status: 400 });
     }
 
-    // Check if user exists
+    // Check existing user
+    console.log("4. Checking existing user");
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
+    
     if (existingUser) {
+      console.log("5. User exists");
       return NextResponse.json({ error: "User already exists" }, { status: 400 });
     }
 
-    // Hash password and create user
+    // Hash password
+    console.log("6. Hashing password");
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    console.log("7. Creating user");
     const user = await prisma.user.create({
       data: {
         name,
@@ -154,16 +174,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log("8. User created successfully:", user.id);
+    
     return NextResponse.json({
       success: true,
-      message: "Registration successful!",
+      message: "Registration successful! Please login.",
     }, { status: 201 });
 
-  } catch (error) {
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("Error:", error);
+    
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    }
+    
+    return NextResponse.json({ 
+      error: error.message || "Internal server error" 
+    }, { status: 500 });
   }
 }
