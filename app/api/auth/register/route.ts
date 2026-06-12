@@ -9,17 +9,15 @@ import crypto from "crypto";
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters")
+  password: z.string().min(6, "Password must be at least 6 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  // Special character no longer required
   phone: z.string().optional(),
   location: z.string().optional(),
-  // dateOfBirth: z.string().optional(),  // ❌ REMOVE THIS - field doesn't exist
-  agreeTerms: z.boolean().refine(val => val === true, "You must agree to the terms"),
+  agreeTerms: z.boolean().optional(),
 });
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
